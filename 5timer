@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pomodoro Timer</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap">
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background-color: transparent; /* 배경색을 투명하게 설정 */
+      color: #ffffff;
+      margin: 0;
+    }
+    .timer {
+      text-align: center;
+      background: transparent; /* 배경색을 투명하게 설정 */
+      padding: 40px;
+      border-radius: 10px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    .clock {
+      display: block;
+      margin: 0 auto 20px;
+      width: 100%;
+      height: auto;
+      max-width: 200px; /* 최대 너비를 설정하여 노션에서 잘리지 않도록 조정 */
+    }
+    .buttons {
+      display: flex;
+      justify-content: center; /* 버튼을 중앙에 배치 */
+      gap: 10px;
+    }
+    button {
+      padding: 6.66px 13.34px; /* 현재 사이즈의 두 배로 조정 */
+      font-size: 24px; /* 글씨 크기를 조정 */
+      font-family: 'Roboto', sans-serif; /* 원하는 폰트 패밀리 추가 */
+      color: #000000; /* 버튼 속의 글씨색을 검정색으로 설정 */
+      background-color: transparent; /* 버튼 배경색을 투명하게 설정 */
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+      text-transform: uppercase; /* 모든 글씨를 대문자로 설정 */
+    }
+    button:hover {
+      background-color: rgba(0, 0, 0, 0.1);
+    }
+  </style>
+</head>
+<body>
+  <div class="timer">
+    <canvas class="clock" id="clockCanvas"></canvas>
+    <div class="buttons">
+      <button id="startButton">▶</button> <!-- 재생 모양 기호 -->
+      <button id="stopButton">◾</button> <!-- 정지 모양 기호 -->
+      <button id="resetButton">◀</button> <!-- 되감기 모양 기호 -->
+    </div>
+  </div>
+  <script>
+    let time = 300; // 5 minutes in seconds
+    let timerInterval;
+    const totalTime = 300; // Total time for countdown
+    const canvas = document.getElementById('clockCanvas');
+    const ctx = canvas.getContext('2d');
+
+    canvas.width = 200;
+    canvas.height = 200;
+    const radius = canvas.width / 2;
+
+    const startButton = document.getElementById('startButton');
+    const stopButton = document.getElementById('stopButton');
+    const resetButton = document.getElementById('resetButton');
+
+    function drawClock() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Draw clock face
+      ctx.beginPath();
+      ctx.arc(radius, radius, radius - 10, 0, 2 * Math.PI);
+      ctx.fillStyle = '#000000'; // 시계 내부 색을 검정색으로 설정
+      ctx.fill();
+      ctx.lineWidth = 5; // 테두리 두께를 절반으로 줄임
+      ctx.strokeStyle = '#000000'; // 테두리 색을 검정색으로 설정
+      ctx.stroke();
+      ctx.closePath();
+
+      // Draw elapsed time arc
+      const elapsedAngle = (2 * Math.PI * (totalTime - time)) / totalTime;
+      ctx.beginPath();
+      ctx.arc(radius, radius, radius - 10, -Math.PI / 2, -Math.PI / 2 + elapsedAngle, false);
+      ctx.lineTo(radius, radius);
+      ctx.fillStyle = '#ffffff';
+      ctx.fill();
+      ctx.closePath();
+
+      // Draw clock hand
+      const handAngle = -Math.PI / 2 + elapsedAngle;
+      ctx.beginPath();
+      ctx.moveTo(radius, radius);
+      ctx.lineTo(
+        radius + (radius - 10) * Math.cos(handAngle), // 바늘을 테두리까지 연장
+        radius + (radius - 10) * Math.sin(handAngle)
+      );
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 4;
+      ctx.stroke();
+      ctx.closePath();
+    }
+
+    function startTimer() {
+      if (!timerInterval) {
+        timerInterval = setInterval(() => {
+          time--;
+          drawClock();
+          if (time <= 0) {
+            clearInterval(timerInterval);
+            timerInterval = null;
+          }
+        }, 1000);
+      }
+    }
+
+    function stopTimer() {
+      clearInterval(timerInterval);
+      timerInterval = null;
+    }
+
+    function resetTimer() {
+      clearInterval(timerInterval);
+      timerInterval = null;
+      time = totalTime; // Reset to 5 minutes
+      drawClock();
+    }
+
+    startButton.addEventListener('click', startTimer);
+    stopButton.addEventListener('click', stopTimer);
+    resetButton.addEventListener('click', resetTimer);
+
+    // Initial draw to set the clock at 5 minutes
+    drawClock();
+  </script>
+</body>
+</html>
